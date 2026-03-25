@@ -76,7 +76,11 @@ in
 
       preStart = ''
         mkdir -p config
-        ${if cfg.settings != {} then "ln -sf ${pkgs.writeText \"${cfg.configEnv}.yaml\" (lib.generators.toYAML {} cfg.settings)} config/${cfg.configEnv}.yaml" else ""}
+        ${lib.optionalString (cfg.settings != { })
+          "ln -sf ${
+            pkgs.writeText "${cfg.configEnv}.yaml" (lib.generators.toYAML { } cfg.settings)
+          } config/${cfg.configEnv}.yaml"
+        }
       '';
 
       serviceConfig = {
@@ -85,13 +89,14 @@ in
         Group = cfg.group;
         WorkingDirectory = cfg.dataDir;
         Restart = "always";
-        
+
         Environment = [
           "DT_ENV=${cfg.configEnv}"
           "DT_SERVER_PORT=${toString cfg.port}"
           "DT_SQLITE_PATH=${cfg.dataDir}/donetick.db"
           "TZ=UTC"
-        ] ++ (lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment);
+        ]
+        ++ (lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment);
 
         # Hardening
         StateDirectory = "donetick";
@@ -101,7 +106,11 @@ in
         ProtectHome = true;
         PrivateTmp = true;
         PrivateDevices = true;
-        RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
+        RestrictAddressFamilies = [
+          "AF_INET"
+          "AF_INET6"
+          "AF_UNIX"
+        ];
       };
     };
 
