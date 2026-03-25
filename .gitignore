@@ -1,0 +1,20 @@
+donetick.db
+.vscode/launch.json
+
+# Nix/Flake related
+result
+result-*
+.direnv/
+flake.lock
+
+# Go related
+vendor/
+core
+donetick
+*.test
+*.out
+
+# Environment/Secrets
+.env
+local.yaml
+config/local.yaml
