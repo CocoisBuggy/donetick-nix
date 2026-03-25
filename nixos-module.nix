@@ -74,22 +74,23 @@ in
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
 
-      preStart = ''
-        mkdir -p config
-        ln -sf ${
-          pkgs.writeText "${cfg.configEnv}.yaml" (
-            lib.generators.toYAML { } (
-              {
-                database = {
-                  type = "sqlite";
-                  path = "${cfg.dataDir}/donetick.db";
-                };
-              }
-              // cfg.settings
-            )
-          )
-        } config/${cfg.configEnv}.yaml"
-      '';
+      preStart =
+        let
+          dbPath = "${cfg.dataDir}/donetick.db";
+          yamlConfig = lib.generators.toYAML { } (
+            {
+              database = {
+                type = "sqlite";
+                path = dbPath;
+              };
+            }
+            // cfg.settings
+          );
+        in
+        ''
+          mkdir -p config
+          ln -sf "${pkgs.writeText "${cfg.configEnv}.yaml" yamlConfig}" config/${cfg.configEnv}.yaml
+        '';
 
       serviceConfig = {
         ExecStart = "${cfg.package}/bin/donetick";
