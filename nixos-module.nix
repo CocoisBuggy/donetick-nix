@@ -76,11 +76,19 @@ in
 
       preStart = ''
         mkdir -p config
-        ${lib.optionalString (cfg.settings != { })
-          "ln -sf ${
-            pkgs.writeText "${cfg.configEnv}.yaml" (lib.generators.toYAML { } cfg.settings)
-          } config/${cfg.configEnv}.yaml"
-        }
+        ln -sf ${
+          pkgs.writeText "${cfg.configEnv}.yaml" (
+            lib.generators.toYAML { } (
+              {
+                database = {
+                  type = "sqlite";
+                  path = "${cfg.dataDir}/donetick.db";
+                };
+              }
+              // cfg.settings
+            )
+          )
+        } config/${cfg.configEnv}.yaml"
       '';
 
       serviceConfig = {
