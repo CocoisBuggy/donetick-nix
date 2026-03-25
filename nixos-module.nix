@@ -14,7 +14,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.donetick; # Assumes it's available in pkgs or via flake inputs
+      default = pkgs.donetick;
       description = "The package to use for DoneTick Core.";
     };
 
@@ -46,15 +46,9 @@ in
       type = lib.types.attrsOf lib.types.str;
       default = { };
       example = {
-        DT_JWT_SECRET = "something-very-secure";
+        DT_JWT_SECRET = "something-very-secure-at-least-32-chars-long";
       };
       description = "Environment variables for DoneTick Core.";
-    };
-
-    extraConfig = lib.mkOption {
-      type = lib.types.attrs;
-      default = { };
-      description = "Extra configuration to be serialized into a config file.";
     };
 
     settings = lib.mkOption {
@@ -110,8 +104,6 @@ in
         RestrictAddressFamilies = [ "AF_INET" "AF_INET6" "AF_UNIX" ];
       };
     };
-
-      };
 
     users.users.${cfg.user} = {
       isSystemUser = true;
