@@ -8,6 +8,10 @@
       url = "github:donetick/donetick";
       flake = false;
     };
+    donetick-frontend = {
+      url = "github:donetick/frontend";
+      flake = false;
+    };
   };
 
   outputs =
@@ -16,6 +20,7 @@
       nixpkgs,
       flake-utils,
       donetick-src,
+      donetick-frontend,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -28,11 +33,24 @@
           version = "0.1.0";
           src = donetick-src;
 
+          nativeBuildInputs = [
+            pkgs.nodejs
+          ];
+
           # Update this hash with the correct one
           # Run `nix build` and it will tell you the correct hash
           vendorHash = "sha256-M2Li0StMzvufBHiQqM2RaNQax8kN8O1Gb4mJf3sLfmE=";
 
           subPackages = [ "." ];
+
+          preBuildPhase = ''
+            rm -rf frontend/dist
+            cp -r ${donetick-frontend} frontend
+            cd frontend
+            npm install
+            npm run build-selfhosted
+            cd ..
+          '';
 
           # Link the binary to a predictable name if needed
           postInstall = ''
@@ -55,6 +73,7 @@
             go
             gopls
             gotools
+            nodejs
           ];
         };
       }
