@@ -34,6 +34,9 @@
                 pkgs.nodejs
                 pkgs.pnpm
               ];
+              allowSubstitutes = false;
+              preferLocalBuild = true;
+              allowNetwork = true;
             }
             ''
               set -e
