@@ -91,12 +91,10 @@
         donetick-frontend = self.packages.${final.system}.donetick-frontend;
       };
 
-      nixosModules.donetick =
-        { pkgs, ... }:
-        {
-          imports = [ ./nixos-module.nix ];
-          nixpkgs.overlays = [ self.overlays.default ];
-        };
+      nixosModules.donetick = {
+        imports = [ ./nixos-module.nix ];
+        nixpkgs.overlays = [ self.overlays.default ];
+      };
 
       nixosModule = self.nixosModules.donetick;
     };
