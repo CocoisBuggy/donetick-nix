@@ -60,7 +60,7 @@
 
           # Update this hash with the correct one
           # Run `nix build .#donetick-frontend` and it will tell you the correct hash
-          npmDepsHash = "sha256-0000000000000000000000000000000000000000000=";
+          npmDepsHash = "sha256-oGvO3lcc02MtYZUWz9XgGslHnxvBViReDTOdQZArR24=";
 
           npmDepsFetcherVersion = 2;
           makeCacheWritable = true;
