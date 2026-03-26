@@ -94,7 +94,8 @@ in
       preStart =
         let
           dbPath = "${cfg.dataDir}/donetick.db";
-          yamlConfig = lib.generators.toYAML { } (
+          configFormat = pkgs.formats.yaml { };
+          yamlFile = configFormat.generate "${cfg.configEnv}.yaml" (
             {
               database = {
                 type = "sqlite";
@@ -106,7 +107,7 @@ in
         in
         ''
           mkdir -p config
-          ln -sf "${pkgs.writeText "${cfg.configEnv}.yaml" yamlConfig}" config/${cfg.configEnv}.yaml
+          ln -sf "${yamlFile}" config/${cfg.configEnv}.yaml
         '';
 
       serviceConfig = {
