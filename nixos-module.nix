@@ -67,21 +67,26 @@ in
       description = "The environment type for configuration loading.";
     };
 
-    frontend = {
-      enable = lib.mkEnableOption "DoneTick Frontend";
+    frontend = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          enable = lib.mkEnableOption "DoneTick Frontend";
 
-      package = lib.mkOption {
-        type = lib.types.package;
-        default = pkgs.donetick-frontend;
-        description = "The package to use for DoneTick Frontend.";
-      };
+          package = lib.mkOption {
+            type = lib.types.package;
+            default = pkgs.donetick-frontend;
+            description = "The package to use for DoneTick Frontend.";
+          };
 
-      outPath = lib.mkOption {
-        type = lib.types.path;
-        readOnly = true;
-        default = "${config.services.donetick.frontend.package}/share/donetick-frontend";
-        description = "The path to the built frontend assets.";
+          outPath = lib.mkOption {
+            type = lib.types.path;
+            readOnly = true;
+            description = "The path to the built frontend assets.";
+          };
+        };
       };
+      default = { };
+      description = "DoneTick Frontend settings.";
     };
   };
 
@@ -150,5 +155,8 @@ in
 
       users.groups.${cfg.group} = { };
     })
+    {
+      services.donetick.frontend.outPath = lib.mkDefault "${cfg.frontend.package}/share/donetick-frontend";
+    }
   ];
 }
