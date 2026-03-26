@@ -79,7 +79,7 @@ in
       outPath = lib.mkOption {
         type = lib.types.path;
         readOnly = true;
-        default = "${cfg.frontend.package}/share/donetick-frontend";
+        default = "${config.services.donetick.frontend.package}/share/donetick-frontend";
         description = "The path to the built frontend assets.";
       };
     };
