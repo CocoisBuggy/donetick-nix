@@ -8,6 +8,10 @@
       url = "github:donetick/donetick";
       flake = false;
     };
+    donetick-frontend = {
+      url = "git+ssh://git@github.com/donetick/frontend.git";
+      flake = false;
+    };
   };
 
   outputs =
@@ -16,6 +20,7 @@
       nixpkgs,
       flake-utils,
       donetick-src,
+      donetick-frontend,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -48,6 +53,27 @@
           };
         };
 
+        packages.donetick-frontend = pkgs.buildNpmPackage {
+          pname = "donetick-frontend";
+          version = "0.1.0";
+          src = donetick-frontend;
+
+          # Update this hash with the correct one
+          # Run `nix build .#donetick-frontend` and it will tell you the correct hash
+          npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
+
+          installPhase = ''
+            mkdir -p $out/share/donetick-frontend
+            cp -r dist/* $out/share/donetick-frontend/
+          '';
+
+          meta = with pkgs.lib; {
+            description = "DoneTick Frontend";
+            homepage = "https://github.com/donetick/frontend";
+            license = licenses.mit;
+          };
+        };
+
         defaultPackage = self.packages.${system}.donetick;
 
         devShells.default = pkgs.mkShell {
@@ -62,6 +88,7 @@
     // {
       overlays.default = final: prev: {
         donetick = self.packages.${final.system}.donetick;
+        donetick-frontend = self.packages.${final.system}.donetick-frontend;
       };
 
       nixosModules.donetick =

@@ -66,70 +66,89 @@ in
       default = "selfhosted";
       description = "The environment type for configuration loading.";
     };
-  };
 
-  config = lib.mkIf cfg.enable {
-    systemd.services.donetick = {
-      description = "DoneTick Core Service";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
+    frontend = {
+      enable = lib.mkEnableOption "DoneTick Frontend";
 
-      preStart =
-        let
-          dbPath = "${cfg.dataDir}/donetick.db";
-          yamlConfig = lib.generators.toYAML { } (
-            {
-              database = {
-                type = "sqlite";
-                path = dbPath;
-              };
-            }
-            // cfg.settings
-          );
-        in
-        ''
-          mkdir -p config
-          ln -sf "${pkgs.writeText "${cfg.configEnv}.yaml" yamlConfig}" config/${cfg.configEnv}.yaml
-        '';
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.donetick-frontend;
+        description = "The package to use for DoneTick Frontend.";
+      };
 
-      serviceConfig = {
-        ExecStart = "${cfg.package}/bin/donetick";
-        User = cfg.user;
-        Group = cfg.group;
-        WorkingDirectory = cfg.dataDir;
-        Restart = "always";
-
-        Environment = [
-          "DT_ENV=${cfg.configEnv}"
-          "DT_SERVER_PORT=${toString cfg.port}"
-          "DT_SQLITE_PATH=${cfg.dataDir}/donetick.db"
-          "TZ=UTC"
-        ]
-        ++ (lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment);
-
-        # Hardening
-        StateDirectory = "donetick";
-        CapabilityBoundingSet = "";
-        NoNewPrivileges = true;
-        ProtectSystem = "full";
-        ProtectHome = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_INET6"
-          "AF_UNIX"
-        ];
+      outPath = lib.mkOption {
+        type = lib.types.path;
+        readOnly = true;
+        default = "${cfg.frontend.package}/share/donetick-frontend";
+        description = "The path to the built frontend assets.";
       };
     };
-
-    users.users.${cfg.user} = {
-      isSystemUser = true;
-      group = cfg.group;
-      home = cfg.dataDir;
-      createHome = false; # Handled by StateDirectory
-    };
-
-    users.groups.${cfg.group} = { };
   };
+
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      systemd.services.donetick = {
+        description = "DoneTick Core Service";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+
+        preStart =
+          let
+            dbPath = "${cfg.dataDir}/donetick.db";
+            yamlConfig = lib.generators.toYAML { } (
+              {
+                database = {
+                  type = "sqlite";
+                  path = dbPath;
+                };
+              }
+              // cfg.settings
+            );
+          in
+          ''
+            mkdir -p config
+            ln -sf "${pkgs.writeText "${cfg.configEnv}.yaml" yamlConfig}" config/${cfg.configEnv}.yaml
+          '';
+
+        serviceConfig = {
+          ExecStart = "${cfg.package}/bin/donetick";
+          User = cfg.user;
+          Group = cfg.group;
+          WorkingDirectory = cfg.dataDir;
+          Restart = "always";
+
+          Environment = [
+            "DT_ENV=${cfg.configEnv}"
+            "DT_SERVER_PORT=${toString cfg.port}"
+            "DT_SQLITE_PATH=${cfg.dataDir}/donetick.db"
+            "TZ=UTC"
+          ]
+          ++ (lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment);
+
+          # Hardening
+          StateDirectory = "donetick";
+          CapabilityBoundingSet = "";
+          NoNewPrivileges = true;
+          ProtectSystem = "full";
+          ProtectHome = true;
+          PrivateTmp = true;
+          PrivateDevices = true;
+          RestrictAddressFamilies = [
+            "AF_INET"
+            "AF_INET6"
+            "AF_UNIX"
+          ];
+        };
+      };
+
+      users.users.${cfg.user} = {
+        isSystemUser = true;
+        group = cfg.group;
+        home = cfg.dataDir;
+        createHome = false; # Handled by StateDirectory
+      };
+
+      users.groups.${cfg.group} = { };
+    })
+  ];
 }
