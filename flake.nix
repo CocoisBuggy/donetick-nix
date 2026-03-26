@@ -60,11 +60,23 @@
 
           # Update this hash with the correct one
           # Run `nix build .#donetick-frontend` and it will tell you the correct hash
-          npmDepsHash = "sha256-oGvO3lcc02MtYZUWz9XgGslHnxvBViReDTOdQZArR24=";
+          npmDepsHash = "sha256-0000000000000000000000000000000000000000000=";
+
+          # Use Node.js 20 explicitly
+          nodejs = pkgs.nodejs_20;
 
           npmDepsFetcherVersion = 2;
           makeCacheWritable = true;
-          npmFlags = [ "--legacy-peer-deps" ];
+
+          # Flags for both fetcher and installer
+          npmFlags = [
+            "--legacy-peer-deps"
+            "--ignore-scripts"
+          ];
+          npmDepsFlags = [
+            "--legacy-peer-deps"
+            "--ignore-scripts"
+          ];
 
           installPhase = ''
             mkdir -p $out/share/donetick-frontend
