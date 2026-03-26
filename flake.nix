@@ -27,39 +27,36 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        donetick-with-frontend =
-          pkgs.runCommand "donetick-src-with-frontend"
-            {
-              nativeBuildInputs = [
-                pkgs.nodejs
-                pkgs.pnpm
-              ];
-              allowSubstitutes = false;
-              preferLocalBuild = true;
-              allowNetwork = true;
-            }
-            ''
-              set -e
-              mkdir -p $out
-              WORKDIR=$(mktemp -d)
-              chmod -R 755 "$WORKDIR"
-              export HOME="$WORKDIR"
-              export TMPDIR="$WORKDIR"
-              export PNPM_HOME="$WORKDIR/.pnpm"
-              export NODE_EXTRA_CA_CERTS="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
-              cp -r ${donetick-src} "$WORKDIR/src"
-              cp -r ${donetick-frontend} "$WORKDIR/frontend-src"
-              chmod -R u+w "$WORKDIR"
-              cd "$WORKDIR/frontend-src"
-              pnpm config set shamefully-hoist true
-              pnpm install
-              pnpm exec vite build --mode selfhosted
-              mkdir -p "$WORKDIR/src/frontend"
-              mv "$WORKDIR/frontend-src/dist"/* "$WORKDIR/src/frontend/" || mv "$WORKDIR/frontend-src/dist" "$WORKDIR/src/frontend"
-              rm -rf "$WORKDIR/frontend-src"
-              cp -r "$WORKDIR/src/"* $out/
-              rm -rf "$WORKDIR"
-            '';
+        donetick-frontend-built = pkgs.buildNpmPackage {
+          pname = "donetick-frontend";
+          version = "1.2.0";
+          src = donetick-frontend;
+
+          npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
+
+          # Use build script from package.json but pass flags
+          npmBuildScript = "build";
+          npmBuildFlags = [
+            "--"
+            "--mode"
+            "selfhosted"
+          ];
+
+          # Necessary for some node_modules that try to write to their own directory
+          makeCacheWritable = true;
+
+          installPhase = ''
+            mkdir -p $out
+            cp -r dist/* $out/
+          '';
+        };
+
+        donetick-with-frontend = pkgs.runCommand "donetick-src-with-frontend" { } ''
+          mkdir -p $out/frontend/dist
+          cp -r ${donetick-src}/* $out/
+          chmod -R u+w $out
+          cp -r ${donetick-frontend-built}/* $out/frontend/dist/
+        '';
       in
       {
         packages.donetick = pkgs.buildGoModule {
