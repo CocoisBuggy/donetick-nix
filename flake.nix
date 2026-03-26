@@ -62,6 +62,10 @@
           # Run `nix build .#donetick-frontend` and it will tell you the correct hash
           npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
 
+          # Fix for ENOTCACHED errors in some npm versions
+          makeCacheWritable = true;
+          npmFlags = [ "--legacy-peer-deps" ];
+
           installPhase = ''
             mkdir -p $out/share/donetick-frontend
             cp -r dist/* $out/share/donetick-frontend/
