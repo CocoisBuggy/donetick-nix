@@ -60,7 +60,7 @@
 
           # Update this hash with the correct one
           # Run `nix build .#donetick-frontend` and it will tell you the correct hash
-          npmDepsHash = "sha256-0000000000000000000000000000000000000000000=";
+          npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
 
           # Use Node.js 20 explicitly
           nodejs = pkgs.nodejs_20;
