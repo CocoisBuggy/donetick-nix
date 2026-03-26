@@ -33,7 +33,6 @@
           version = "0.1.0";
           src = donetick-src;
 
-          # Update this hash with the correct one
           # Run `nix build` and it will tell you the correct hash
           vendorHash = "sha256-M2Li0StMzvufBHiQqM2RaNQax8kN8O1Gb4mJf3sLfmE=";
 
@@ -53,46 +52,29 @@
           };
         };
 
-        packages.donetick-frontend = pkgs.buildNpmPackage {
-          pname = "donetick-frontend";
-          version = "0.1.0";
-          src = donetick-frontend;
+        # packages.donetick-frontend = pkgs.buildNpmPackage {
+        #   pname = "donetick-frontend";
+        #   version = "0.1.0";
+        #   src = donetick-frontend;
 
-          # Update this hash with the correct one
-          # Run `nix build .#donetick-frontend` and it will tell you the correct hash
-          npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
+        #   # Run `nix build .#donetick-frontend` and it will tell you the correct hash
+        #   npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
 
-          # Use Node.js 20 explicitly
-          nodejs = pkgs.nodejs_20;
+        #   # Use Node.js 20 explicitly
+        #   nodejs = pkgs.nodejs_20;
+        #   npmBuildScript = "build";
 
-          npmDepsFetcherVersion = 1;
-          makeCacheWritable = true;
+        #   installPhase = ''
+        #     mkdir -p $out/share/donetick-frontend
+        #     cp -r dist/* $out/share/donetick-frontend/
+        #   '';
 
-          # Flags for both fetcher and installer
-          npmFlags = [
-            "--legacy-peer-deps"
-            "--ignore-scripts"
-            "--no-audit"
-            "--no-fund"
-          ];
-          npmDepsFlags = [
-            "--legacy-peer-deps"
-            "--ignore-scripts"
-            "--no-audit"
-            "--no-fund"
-          ];
-
-          installPhase = ''
-            mkdir -p $out/share/donetick-frontend
-            cp -r dist/* $out/share/donetick-frontend/
-          '';
-
-          meta = with pkgs.lib; {
-            description = "DoneTick Frontend";
-            homepage = "https://github.com/donetick/frontend";
-            license = licenses.mit;
-          };
-        };
+        #   meta = with pkgs.lib; {
+        #     description = "DoneTick Frontend";
+        #     homepage = "https://github.com/donetick/frontend";
+        #     license = licenses.mit;
+        #   };
+        # };
 
         defaultPackage = self.packages.${system}.donetick;
 
