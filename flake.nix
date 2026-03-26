@@ -32,7 +32,8 @@
           version = "1.2.0";
           src = donetick-frontend;
 
-          npmDepsHash = "sha256-+7O8UuQj43NT6evlVbJTRW1NtGMaoPXOud/sfC32aO4=";
+          npmDepsHash = "sha256-oGvO3lcc02MtYZUWz9XgGslHnxvBViReDTOdQZArR24=";
+          npmDepsFetcherVersion = 2;
 
           # Use build script from package.json but pass flags
           npmBuildScript = "build";
@@ -41,6 +42,9 @@
             "--mode"
             "selfhosted"
           ];
+
+          # Avoid peer dependency issues often found in modern npm
+          npmFlags = [ "--legacy-peer-deps" ];
 
           # Necessary for some node_modules that try to write to their own directory
           makeCacheWritable = true;
